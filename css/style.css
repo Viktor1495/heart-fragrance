@@ -2153,7 +2153,6 @@ p {
     aspect-ratio: 4 / 5;
     min-height: 560px;
     overflow: hidden;
-    border-radius: 34px;
     background: var(--forest);
     box-shadow: 0 25px 70px rgba(18,51,43,.14);
 }
@@ -2426,7 +2425,6 @@ p {
     .hero-media-window {
         aspect-ratio: 16 / 11;
         min-height: 0;
-        border-radius: 26px;
     }
 
     .stories-heading {
@@ -2451,7 +2449,6 @@ p {
 
     .hero-media-window {
         aspect-ratio: 4 / 5;
-        border-radius: 22px;
     }
 
     .hero-media-caption {
