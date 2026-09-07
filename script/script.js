@@ -1,6 +1,61 @@
 document.addEventListener("DOMContentLoaded", () => {
 
     /* =========================================
+       HERO MEDIA CAROUSEL
+    ========================================= */
+
+    const heroMediaSlides = document.querySelectorAll(".hero-media-slide");
+    const heroMediaDots = document.querySelectorAll(".hero-media-dots button");
+    const heroMediaPrev = document.getElementById("heroMediaPrev");
+    const heroMediaNext = document.getElementById("heroMediaNext");
+
+    let heroMediaIndex = 0;
+    let heroMediaTimer;
+
+    function showHeroMedia(index) {
+        if (!heroMediaSlides.length) return;
+
+        heroMediaIndex = (index + heroMediaSlides.length) % heroMediaSlides.length;
+
+        heroMediaSlides.forEach((slide, i) => {
+            slide.classList.toggle("active", i === heroMediaIndex);
+        });
+
+        heroMediaDots.forEach((dot, i) => {
+            dot.classList.toggle("active", i === heroMediaIndex);
+        });
+    }
+
+    function resetHeroMediaTimer() {
+        clearInterval(heroMediaTimer);
+        heroMediaTimer = setInterval(() => {
+            showHeroMedia(heroMediaIndex + 1);
+        }, 5000);
+    }
+
+    if (heroMediaSlides.length) {
+        heroMediaNext?.addEventListener("click", () => {
+            showHeroMedia(heroMediaIndex + 1);
+            resetHeroMediaTimer();
+        });
+
+        heroMediaPrev?.addEventListener("click", () => {
+            showHeroMedia(heroMediaIndex - 1);
+            resetHeroMediaTimer();
+        });
+
+        heroMediaDots.forEach((dot, index) => {
+            dot.addEventListener("click", () => {
+                showHeroMedia(index);
+                resetHeroMediaTimer();
+            });
+        });
+
+        resetHeroMediaTimer();
+    }
+
+
+    /* =========================================
        CART
     ========================================= */
 
@@ -277,168 +332,169 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
 
-    /* =========================================
-       CATALOG FILTERS
-    ========================================= */
+/* =========================================
+   CATALOG MENU
+========================================= */
 
-    const categoryFilter =
-        document.getElementById("categoryFilter");
+const catalogLinks =
+    document.querySelectorAll(".catalog-link");
 
-    const aromaFilter =
-        document.getElementById("aromaFilter");
-
-    const sortFilter =
-        document.getElementById("sortFilter");
-
-    const catalogProducts =
-        document.getElementById("catalogProducts");
-
-    const productsFound =
-        document.getElementById("productsFound");
+const productCards =
+    document.querySelectorAll(".product-card");
 
 
-    function filterProducts() {
+function showCatalogCategory(category) {
 
-        const category =
-            categoryFilter.value;
+    /*
+        Показываем / скрываем товары
+    */
 
-        const aroma =
-            aromaFilter.value;
+    productCards.forEach(card => {
 
-        const products =
-            Array.from(
-                document.querySelectorAll(".catalog-product")
+        const cardCategory =
+            card.dataset.category;
+
+        if (
+            category === "all" ||
+            cardCategory === category
+        ) {
+
+            card.classList.remove(
+                "is-hidden"
             );
 
+        } else {
 
-        let visibleProducts = products.filter(product => {
+            card.classList.add(
+                "is-hidden"
+            );
 
-            const categoryMatch =
-                category === "all" ||
-                product.dataset.category === category;
-
-            const aromaMatch =
-                aroma === "all" ||
-                product.dataset.aroma === aroma;
-
-            return categoryMatch && aromaMatch;
-
-        });
-
-
-        products.forEach(product => {
-
-            product.classList.add("hidden");
-
-        });
-
-
-        visibleProducts.forEach(product => {
-
-            product.classList.remove("hidden");
-
-        });
-
-
-        sortProducts(visibleProducts);
-
-        productsFound.textContent =
-            visibleProducts.length;
-
-    }
-
-
-    function sortProducts(products) {
-
-        const type = sortFilter.value;
-
-        products.sort((a, b) => {
-
-            if (type === "low") {
-
-                return Number(a.dataset.price) -
-                       Number(b.dataset.price);
-
-            }
-
-            if (type === "high") {
-
-                return Number(b.dataset.price) -
-                       Number(a.dataset.price);
-
-            }
-
-            if (type === "new") {
-
-                return (b.dataset.new === "true") -
-                       (a.dataset.new === "true");
-
-            }
-
-            return 0;
-
-        });
-
-
-        products.forEach(product => {
-
-            catalogProducts.appendChild(product);
-
-        });
-
-    }
-
-
-    categoryFilter.addEventListener(
-        "change",
-        filterProducts
-    );
-
-    aromaFilter.addEventListener(
-        "change",
-        filterProducts
-    );
-
-    sortFilter.addEventListener(
-        "change",
-        filterProducts
-    );
-
-
-    /* =========================================
-       CATEGORY BUTTONS
-    ========================================= */
-
-    document.querySelectorAll(
-        "[data-category]"
-    ).forEach(button => {
-
-        button.addEventListener("click", () => {
-
-            const category =
-                button.dataset.category;
-
-            if (!category) return;
-
-
-            categoryFilter.value = category;
-
-            document.querySelectorAll(
-                ".category-main"
-            ).forEach(item => {
-
-                item.classList.remove("active");
-
-            });
-
-
-            button.classList.add("active");
-
-            filterProducts();
-
-        });
+        }
 
     });
+
+
+    /*
+        Активный пункт меню
+    */
+
+    catalogLinks.forEach(link => {
+
+        link.classList.toggle(
+            "active",
+            link.dataset.category === category
+        );
+
+    });
+
+
+    /*
+        Запоминаем выбранную категорию
+    */
+
+    localStorage.setItem(
+        "catalogCategory",
+        category
+    );
+
+}
+
+
+/*
+    Нажатие на пункт каталога
+*/
+
+catalogLinks.forEach(link => {
+
+    link.addEventListener(
+        "click",
+        () => {
+
+            const category =
+                link.dataset.category;
+
+            showCatalogCategory(
+                category
+            );
+
+        }
+    );
+
+});
+
+
+/*
+    Начальное состояние
+*/
+
+const savedCatalogCategory =
+    localStorage.getItem(
+        "catalogCategory"
+    );
+
+
+if (
+    savedCatalogCategory &&
+    Array.from(catalogLinks).some(
+        link =>
+            link.dataset.category ===
+            savedCatalogCategory
+    )
+) {
+
+    showCatalogCategory(
+        savedCatalogCategory
+    );
+
+} else {
+
+    showCatalogCategory("all");
+
+}
+
+
+/* =========================================
+   COLLECTIONS → CATALOG
+========================================= */
+
+const collectionLinks =
+    document.querySelectorAll(
+        "[data-catalog-category]"
+    );
+
+
+collectionLinks.forEach(link => {
+
+    link.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            const category =
+                link.dataset.catalogCategory;
+
+            const catalog =
+                document.querySelector(
+                    "#catalog"
+                );
+
+            if (catalog) {
+
+                catalog.scrollIntoView({
+                    behavior: "smooth"
+                });
+
+            }
+
+            showCatalogCategory(
+                category
+            );
+
+        }
+    );
+
+});
 
 
     /* =========================================
@@ -1156,5 +1212,41 @@ window.addEventListener(
         }
 
     });
+
+
+
+    /* =========================================
+       ACTIVE NAVIGATION
+    ========================================= */
+
+    const navLinks = document.querySelectorAll(".nav a");
+    const navSections = [
+        { id: "catalog" },
+        { id: "about" },
+        { id: "delivery" },
+        { id: "contacts" }
+    ];
+
+    function updateActiveNav() {
+        const current = window.scrollY + 150;
+        let activeId = "";
+
+        navSections.forEach(section => {
+            const element = document.getElementById(section.id);
+            if (element && element.offsetTop <= current) {
+                activeId = section.id;
+            }
+        });
+
+        navLinks.forEach(link => link.classList.remove("active"));
+
+        if (activeId) {
+            const activeLink = document.querySelector(`.nav a[href="#${activeId}"]`);
+            if (activeLink) activeLink.classList.add("active");
+        }
+    }
+
+    window.addEventListener("scroll", updateActiveNav, { passive: true });
+    updateActiveNav();
 
 });
