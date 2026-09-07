@@ -854,6 +854,7 @@ p {
 .badge.gold {
     background: var(--gold);
     color: var(--emerald);
+    font-size: 15px;
 }
 
 .product-info {
